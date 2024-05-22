@@ -7,8 +7,6 @@ import ApiResponse from "../models/ServerResponse";
 export async function createUser(data: UserCreationData) {
   const hashedPass = await bcryp.hash(data.pass, 15);
 
-  console.log("HASHED PASS", hashedPass, data.pass);
-
   const response = await prisma.user.create({
     select: {
       pass: false,
@@ -29,7 +27,6 @@ export async function createUser(data: UserCreationData) {
 }
 
 export async function getUserByEmailAndPass(email: string, pass: string) {
-  console.log("GETTING USER BY EMAIL AND PASS", email, pass);
   const user = await prisma.user.findFirst({
     where: {
       email: email,
@@ -40,7 +37,6 @@ export async function getUserByEmailAndPass(email: string, pass: string) {
     throw ApiError.notFound(ApiResponse.badRequest("Invalid credentials"));
 
   const hashedPass = await bcryp.compare(pass, user.pass);
-  console.log(hashedPass, user);
   if (!hashedPass)
     throw ApiError.notFound(ApiResponse.badRequest("Invalid credentials"));
 

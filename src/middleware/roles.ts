@@ -14,6 +14,7 @@ export function allowRole(role: Role) {
   ) {
     try {
       const token = authFinder(req);
+      console.log(token);
       if (!token)
         throw ApiError.unauthorized(ApiResponse.badRequest("Token not found"));
       const decodedToken = verifyToken(token);
@@ -25,7 +26,6 @@ export function allowRole(role: Role) {
         throw ApiError.unauthorized(ApiResponse.badRequest("User not found!"));
       if (!user.role.includes(role))
         throw ApiError.unauthorized(ApiResponse.badRequest("Unauthorized"));
-
 
       req.user = user;
       next();

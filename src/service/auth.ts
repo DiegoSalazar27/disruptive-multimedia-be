@@ -5,8 +5,6 @@ import ApiResponse from "../models/ServerResponse";
 
 const secret = process.env.JWT_SECRET || "SOME_SECRET";
 
-console.log(secret);
-
 export function sign(alias: string, email: string) {
   return jwt.sign({
     username: alias,

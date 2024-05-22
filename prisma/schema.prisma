@@ -20,23 +20,33 @@ enum Role {
 }
 
 model User {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  email String @unique
-  alias String @unique
-  role  Role
-  pass  String
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  email       String @unique
+  alias       String @unique
+  role        Role
+  pass        String
+  contents    Content[]
 }
 
 model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String   @unique
-  themesIDs String[] @db.ObjectId
-  themes    Theme[]  @relation(fields: [themesIDs], references: [id])
+  coverUrl  String
+  topicsIDs String[] @db.ObjectId
+  topics    Topic[]  @relation(fields: [topicsIDs], references: [id])
 }
 
-model Theme {
+model Topic {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   name          String     @unique
   categoriesIDs String[]   @db.ObjectId
   categories    Category[] @relation(fields: [categoriesIDs], references: [id])
+}
+
+model Content {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  fileURL       String
+  creditsID     String     @db.ObjectId
+  credits       User       @relation(fields: [creditsID], references: [id])
 }
