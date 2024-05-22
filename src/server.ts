@@ -8,8 +8,8 @@ import { loginCredentialsSchema } from "./models/auth";
 import { getUserByEmailAndPass } from "./service/user";
 import { sign } from "./service/auth";
 import ApiResponse from "./models/ServerResponse";
-import { allowRole } from "./middleware/roles";
 import uploadRouter from "./router/files";
+import contentRouter from "./router/content";
 
 const app = express();
 
@@ -19,6 +19,7 @@ app.use(express.json());
 app.use("/user", userRouter);
 app.use("/topic", topicRouter);
 app.use("/category", categoriesRouter);
+app.use("/content", contentRouter);
 app.use("/login", async (req, res, next) => {
   try {
     console.log("logging in")
@@ -35,7 +36,8 @@ app.use("/login", async (req, res, next) => {
   }
 });
 
-app.use('/upload', uploadRouter)
+app.use("/files", uploadRouter);
+app.use('/uploads', express.static(process.cwd() + '/tmp/uploads'));
 app.use(apiErrorHandler);
 
 export default app;

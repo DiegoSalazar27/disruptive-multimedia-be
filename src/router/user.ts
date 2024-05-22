@@ -34,19 +34,6 @@ userRouter.post("/", async (req, res, next) => {
   }
 });
 
-userRouter.post("/createAdmin", allowRole("CRUD"), async (req, res, next) => {
-  try {
-    console.log("creating admin");
-    const data = adminCreationSchema.parse(req.body);
-    const response = await createUser({ ...data, role: "CRUD" });
-
-    return res.status(200).send(ApiResponse.success("Success", response));
-  } catch (error) {
-    console.error("Error creating user", error);
-    next(error);
-  }
-});
-
 userRouter.get("/", allowRole("CRUD"), async (_req, res, next) => {
   try {
     console.log("Getting users");
@@ -56,6 +43,19 @@ userRouter.get("/", allowRole("CRUD"), async (_req, res, next) => {
     res.send(ApiResponse.success("Success", response));
   } catch (error) {
     console.error("Error getting users", error);
+    next(error);
+  }
+});
+
+userRouter.post("/createAdmin", allowRole("CRUD"), async (req, res, next) => {
+  try {
+    console.log("creating admin");
+    const data = adminCreationSchema.parse(req.body);
+    const response = await createUser({ ...data, role: "CRUD" });
+
+    return res.status(200).send(ApiResponse.success("Success", response));
+  } catch (error) {
+    console.error("Error creating user", error);
     next(error);
   }
 });

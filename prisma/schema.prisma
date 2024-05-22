@@ -20,20 +20,24 @@ enum Role {
 }
 
 model User {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  email       String @unique
-  alias       String @unique
-  role        Role
-  pass        String
-  contents    Content[]
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  email    String    @unique
+  alias    String    @unique
+  role     Role
+  pass     String
+  contents Content[]
 }
 
 model Category {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   @unique
-  coverUrl  String
-  topicsIDs String[] @db.ObjectId
-  topics    Topic[]  @relation(fields: [topicsIDs], references: [id])
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String    @unique
+  coverUrl   String
+  allowImage Boolean   @default(false)
+  allowVideo Boolean   @default(false)
+  allowText  Boolean   @default(false)
+  topicsIDs  String[]  @db.ObjectId
+  topics     Topic[]   @relation(fields: [topicsIDs], references: [id])
+  content    Content[]
 }
 
 model Topic {
@@ -44,9 +48,12 @@ model Topic {
 }
 
 model Content {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  fileURL       String
-  creditsID     String     @db.ObjectId
-  credits       User       @relation(fields: [creditsID], references: [id])
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  fileURL    String
+  creditsID  String    @db.ObjectId
+  credits    User      @relation(fields: [creditsID], references: [id])
+  Category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @db.ObjectId
 }
+

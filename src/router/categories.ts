@@ -2,10 +2,13 @@ import express from "express";
 import { prisma } from "../service/prisma";
 import { categoryCreationSchema } from "../models/category";
 import ApiResponse from "../models/ServerResponse";
+import { createContentSchema } from "../models/content";
+import ApiError from "../errors/ApiError";
+import { allowRole } from "../middleware/roles";
 
 const categoriesRouter = express.Router();
 
-categoriesRouter.get("/", async (_req, res, next) => {
+categoriesRouter.get("/", allowRole("R"), async (_req, res, next) => {
   try {
     const categories = await prisma.category.findMany();
     res.status(200).send(ApiResponse.success("Success", categories));
@@ -15,11 +18,11 @@ categoriesRouter.get("/", async (_req, res, next) => {
   }
 });
 
-categoriesRouter.post("/", async (req, res, next) => {
+categoriesRouter.post("/", allowRole("CRU"), async (req, res, next) => {
   try {
     const data = categoryCreationSchema.parse(req.body);
     const response = await prisma.category.create({
-      data
+      data,
     });
     res.status(200).send(ApiResponse.success("Success", response));
   } catch (error) {
@@ -28,7 +31,7 @@ categoriesRouter.post("/", async (req, res, next) => {
   }
 });
 
-categoriesRouter.put("/:id", async (req, res, next) => {
+categoriesRouter.put("/:id", allowRole("CRU"), async (req, res, next) => {
   try {
     const { id } = req.params;
     const data = categoryCreationSchema.parse(req.body);
@@ -45,7 +48,7 @@ categoriesRouter.put("/:id", async (req, res, next) => {
   }
 });
 
-categoriesRouter.delete("/:id", async (req, res, next) => {
+categoriesRouter.delete("/:id", allowRole("CRUD"), async (req, res, next) => {
   try {
     const { id } = req.params;
     const response = await prisma.category.delete({
@@ -56,6 +59,44 @@ categoriesRouter.delete("/:id", async (req, res, next) => {
     res.status(200).send(ApiResponse.success("Success", response));
   } catch (error) {
     console.error("Error deleting category", error);
+    next(error);
+  }
+});
+
+categoriesRouter.get("/:id/content", allowRole("R"), async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const response = await prisma.content.findMany({
+      where: {
+        categoryId: id
+      }
+    });
+    res.status(200).send(ApiResponse.success("Success", response));
+  } catch (error) {
+    console.error("error getiing content", error);
+    next(error);
+  }
+});
+
+categoriesRouter.post("/:id/content", allowRole("CRU"), async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (!user)
+      throw ApiError.notFound(ApiResponse.badRequest("User not found"));
+
+    const id = req.params.id;
+    const data = createContentSchema.parse(req.body);
+    const response = await prisma.content.create({
+      data: {
+        ...data,
+        creditsID: user.id,
+        categoryId: id
+      }
+    });
+
+    res.status(200).send(ApiResponse.success("Success", response));
+  } catch (error) {
+    console.error("Error creating content", error);
     next(error);
   }
 });

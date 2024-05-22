@@ -2,6 +2,7 @@ import express from "express";
 import { prisma } from "../service/prisma";
 import ApiResponse from "../models/ServerResponse";
 import { topicCreationSchema } from "../models/topic";
+import { allowRole } from "../middleware/roles";
 
 const topicRouter = express.Router();
 
@@ -14,6 +15,20 @@ topicRouter.get("/", async (_req, res, next) => {
     next(error);
   }
 });
+
+topicRouter.get("/:id", async (_req, res, next) => {
+  try {
+    const topics = await prisma.topic.findUnique({
+      where: { id: _req.params.id },
+    });
+    res.status(200).send(ApiResponse.success("Success", topics));
+  } catch (error) {
+    console.error("Error getting topic", error);
+    next(error);
+  }
+});
+
+topicRouter.use(allowRole("CRUD"));
 
 topicRouter.post("/", async (req, res, next) => {
   try {
@@ -56,6 +71,30 @@ topicRouter.delete("/:id", async (req, res, next) => {
     res.status(200).send(ApiResponse.success("Success", topics));
   } catch (error) {
     console.error("Error deleting topic", error);
+    next(error);
+  }
+});
+
+topicRouter.get("/search", async (req, res, next) => {
+  try {
+    const search = req.query.q;
+    if (!search) {
+      res.status(200).send(ApiResponse.success("Success", {}));
+      return;
+    }
+
+    const strSeach = String(search);
+    const response = prisma.topic.findMany({
+      where: {
+        name: {
+          contains: strSeach,
+        },
+      },
+    });
+
+    res.status(200).send(ApiResponse.success("Success", response));
+  } catch (error) {
+    console.error("Error seaching topic", error);
     next(error);
   }
 });
