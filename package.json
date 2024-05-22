@@ -10,6 +10,9 @@
     "db-dev": "docker-compose up --build -d && npm run dev",
     "db-dev-down": "docker-compose down"
   },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

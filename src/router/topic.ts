@@ -3,6 +3,7 @@ import { prisma } from "../service/prisma";
 import ApiResponse from "../models/ServerResponse";
 import { topicCreationSchema } from "../models/topic";
 import { allowRole } from "../middleware/roles";
+import { categoryCreationSchema } from "../models/category";
 
 const topicRouter = express.Router();
 
@@ -87,9 +88,9 @@ topicRouter.get("/search", async (req, res, next) => {
     const response = prisma.topic.findMany({
       where: {
         name: {
-          contains: strSeach,
-        },
-      },
+          contains: strSeach
+        }
+      }
     });
 
     res.status(200).send(ApiResponse.success("Success", response));
@@ -98,5 +99,38 @@ topicRouter.get("/search", async (req, res, next) => {
     next(error);
   }
 });
+
+topicRouter.get("/:id/categories", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const categories = await prisma.category.findMany({
+      where: {
+        topicsID: id
+      }
+    });
+    res.status(200).send(ApiResponse.success("Success", categories));
+  } catch (error) {
+    console.error("Error getting categories", error);
+    next(error)
+  }
+});
+
+topicRouter.post("/:id/categories", allowRole("CRU"), async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const data = categoryCreationSchema.parse(req.body);
+    const response = await prisma.category.create({
+      data: {
+        ...data,
+        topicsID: id
+      }
+    });
+    res.status(200).send(ApiResponse.success("Success", response));
+  } catch (error) {
+    console.error("Error creating category", error);
+    next(error);
+  }
+});
+
 
 export default topicRouter;

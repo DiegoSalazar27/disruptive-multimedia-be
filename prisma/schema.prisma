@@ -35,16 +35,15 @@ model Category {
   allowImage Boolean   @default(false)
   allowVideo Boolean   @default(false)
   allowText  Boolean   @default(false)
-  topicsIDs  String[]  @db.ObjectId
-  topics     Topic[]   @relation(fields: [topicsIDs], references: [id])
+  topicsID   String    @db.ObjectId
+  topic      Topic     @relation(fields: [topicsID], references: [id])
   content    Content[]
 }
 
 model Topic {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  name          String     @unique
-  categoriesIDs String[]   @db.ObjectId
-  categories    Category[] @relation(fields: [categoriesIDs], references: [id])
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  name       String     @unique
+  categories Category[]
 }
 
 model Content {
