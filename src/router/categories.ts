@@ -18,6 +18,18 @@ categoriesRouter.get("/", allowRole("R"), async (_req, res, next) => {
   }
 });
 
+categoriesRouter.get("/:id", async (_req, res, next) => {
+  try {
+    const topics = await prisma.category.findUnique({
+      where: { id: _req.params.id },
+    });
+    res.status(200).send(ApiResponse.success("Success", topics));
+  } catch (error) {
+    console.error("Error getting category", error);
+    next(error);
+  }
+});
+
 categoriesRouter.put("/:id", allowRole("CRU"), async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -58,7 +70,23 @@ categoriesRouter.get("/:id/content", allowRole("R"), async (req, res, next) => {
         categoryId: id,
       },
     });
-    res.status(200).send(ApiResponse.success("Success", response));
+
+    const fullResponsePromise = response.map(async (content) => {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: content.creditsID,
+        },
+        select: {
+          alias: true,
+        },
+      });
+
+      return { ...content, creditsAlias: user?.alias ?? "" };
+    });
+
+    const fullResponse = await Promise.all(fullResponsePromise);
+
+    res.status(200).send(ApiResponse.success("Success", fullResponse));
   } catch (error) {
     console.error("error getiing content", error);
     next(error);

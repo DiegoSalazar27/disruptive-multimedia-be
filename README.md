@@ -29,3 +29,5 @@ El entry point del proyecto es `scr/app.ts`, donde se ejecuta el server. El serv
 Los servicios como db, auth y fileUpload se encuentran en `/src/`.
 
 El schema de la base de datos se encuentra en `/prisma/schema.prisma` junto al script para hacer el seed.
+
+- Para Revisar la base de datos hay una instancia de mongo express corriendo en localhost:8081
